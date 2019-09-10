@@ -21,7 +21,7 @@ Detect toxic comments and minimize unintended model bias
 2. [BERT](https://arxiv.org/abs/1810.04805) finetuning with slanted triangular learning rates ([ref](https://arxiv.org/abs/1801.06146)).
 3. [GPT-2](https://openai.com/blog/better-language-models/) finetuning with slanted triangular learning rates.
 
-Code in 2. 3. is based on [huggingface's code](https://github.com/huggingface/pytorch-transformers).
+Code in 2. 3. is based on [huggingface's code](https://github.com/huggingface/pytorch-transformers), and the notebooks are run on kaggle kernel.
 
 ### Dependencies
-Pytorch 1.0.1
+Pytorch 1.2.0
