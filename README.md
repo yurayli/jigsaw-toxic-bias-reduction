@@ -12,7 +12,7 @@ Detect toxic comments and minimize unintended model bias
  * separate data for buckets, several batches of samples a bucket
  * sort sequence lengths for each bucket
  * pad a batch from max_seq_length in the batch
-3. Custom loss or sample weighting required for mitigation of bias
+3. Custom loss or sample weighting required for the mitigation of the model bias
 4. Soft label contains more information and can be computed with BCE loss.
 5. Pseudo label is helpful for LSTM-based NN
 6. Knowledge distillation can compress an ensemble to a single model with comparative results.
