@@ -171,7 +171,7 @@ for i, (trn_idx, val_idx) in enumerate(cv_indices):
         val_scores = np.average(single_val_preds, weights=ckpt_weights, axis=0)
         val_unbias_auc = check_unbias_auc(val_df.copy(), val_scores)
         ckpt_val_preds.append(val_scores)
-        print('{"metric": "Ckpt CV Val. Unbiased AUC", "value": %.4f, "epoch": %d}' % (val_unbias_auc, e+1))
+        print('{"metric": "Ckpt CV Val. Unbiased AUC", "value": %.4f}' % (val_unbias_auc, ))
 
     ema.set_weights(ema_model)
     # https://stackoverflow.com/questions/53231571/what-does-flatten-parameters-do
@@ -182,7 +182,7 @@ for i, (trn_idx, val_idx) in enumerate(cv_indices):
     val_scores = eval_model(ema_model, val_loader, 'val')[val_original_indices]
     val_unbias_auc = check_unbias_auc(val_df.copy(), val_scores)
     ema_val_preds.append(val_scores)
-    print('{"metric": "EMA Val. Unbiased AUC", "value": %.4f, "epoch": %d}' % (val_unbias_auc, e+1))
+    print('{"metric": "EMA Val. Unbiased AUC", "value": %.4f}' % (val_unbias_auc, ))
 
     torch.cuda.empty_cache()
     print()
