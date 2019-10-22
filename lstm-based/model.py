@@ -1,13 +1,45 @@
 from utils import *
 
 
+def compute_loss(predictions, labels, subgroups, power=1.0,
+            score_function=nn.BCEWithLogitsLoss(reduction='none')):
+    """
+    predictions: (N, )
+    labels: (N, )
+    subgroups: (N, 9)
+    """
+    subgroup_positive_mask = subgroups & (labels.unsqueeze(-1) >= 0.5)
+    subgroup_negative_mask = subgroups & ~(labels.unsqueeze(-1) >= 0.5)
+    background_positive_mask = ~subgroups & (labels.unsqueeze(-1) >= 0.5)
+    background_negative_mask = ~subgroups & ~(labels.unsqueeze(-1) >= 0.5)
+
+    bpsn_mask = (background_positive_mask | subgroup_negative_mask).float()
+    bnsp_mask = (background_negative_mask | subgroup_positive_mask).float()
+    subgroups = subgroups.float()
+    predictions = predictions.float()
+    labels = labels.float()
+
+    bce = score_function(predictions, labels)   # (N, )
+    sb = (bce.unsqueeze(-1) * subgroups).sum(0).div(subgroups.sum(0).clamp(1.))\
+            .mean()
+#             .pow(power).mean().pow(1/power)
+    bpsn = (bce.unsqueeze(-1) * bpsn_mask).sum(0).div(bpsn_mask.sum(0).clamp(1.))\
+            .mean()
+#             .pow(power).mean().pow(1/power)
+    bnsp = (bce.unsqueeze(-1) * bnsp_mask).sum(0).div(bnsp_mask.sum(0).clamp(1.))\
+            .mean()
+#             .pow(power).mean().pow(1/power)
+    return (bce.mean() + sb + bpsn + bnsp) / 4
+
+
 class UnbiasLoss(nn.Module):
-    def __init__(self, main_loss_weight=3.0):
+    def __init__(self, main_loss_weight=1.0):
         super(UnbiasLoss, self).__init__()
         self.alpha = main_loss_weight
     def forward(self, pred_scores, labels):
-        main_loss = nn.BCEWithLogitsLoss(weight=labels[:,-1])(pred_scores[:,0], labels[:,0])
-        aux_loss = nn.BCEWithLogitsLoss()(pred_scores[:,1:], labels[:,1:-1])
+        subgs = (labels[:, -len(identity_columns):] >= 0.5)
+        main_loss = compute_loss(pred_scores[:,0], labels[:,0], subgs)
+        aux_loss = nn.BCEWithLogitsLoss()(pred_scores[:,1:-len(identity_columns)], labels[:,1:-len(identity_columns)])
         return self.alpha * main_loss + aux_loss
 
 
@@ -152,7 +184,7 @@ class JigsawNet(nn.Module):
         # Init layers
         self.emb_layer = EmbeddingLayer(vocab_size, embed_dim, embed_matrix)
         self.rnns = RecurrentNet(embed_dim, hidden_dim)
-        self.classifier = CommentClassifier(hidden_dim, 16)
+        self.classifier = CommentClassifier(hidden_dim, 17)
 
     def forward(self, seq):
         emb = self.emb_layer(seq)

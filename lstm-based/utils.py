@@ -23,7 +23,7 @@ identity_columns = [
     'male', 'female', 'homosexual_gay_or_lesbian', 'christian', 'jewish',
     'muslim', 'black', 'white', 'psychiatric_or_mental_illness']
 
-aux_columns = ['target', 'severe_toxicity', 'obscene', 'threat', 'insult', 'identity_attack']
+aux_columns = ['target', 'severe_toxicity', 'obscene', 'threat', 'insult', 'identity_attack', 'sexual_explicit']
 
 label_column = 'target'
 pred_column = 'prediction'

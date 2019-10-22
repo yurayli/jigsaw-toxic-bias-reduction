@@ -54,14 +54,9 @@ def load_and_preproc():
     test_df[text_column] = test_df[text_column].apply(clean_text)
     print('cleaning complete in {:.0f} seconds.'.format(time.time()-t0))
 
-    sample_weights = np.ones(len(train_df))
-    sample_weights += train_df[identity_columns].values.sum(1) * 3
-    sample_weights += train_df[label_column].values * 8
-    sample_weights /= sample_weights.max()
-    train_tars = train_df[[label_column]+aux_columns+identity_columns].values
-    train_tars = np.hstack([train_tars, sample_weights[:,None]]).astype('float32')
-    # train_tars = train_df[label_column].values
-    # train_tars = np.vstack([train_tars, sample_weights]).T.astype('float32')
+    id_cols = train_df[identity_columns].copy().fillna(0).values
+    train_tars = train_df[[label_column]+aux_columns].values
+    train_tars = np.hstack([train_tars, id_cols]).astype('float32')
 
     train_df = convert_dataframe_to_bool(train_df)
     df = train_df[[label_column]+identity_columns].copy()
@@ -102,8 +97,7 @@ for i in range(args.nb_models):
     model = JigsawNet(*embed_mat.shape, 128, embed_mat)
     model.to(device)
     model.load_state_dict(models[f'fold_{i}'])
-    test_scores = eval_model(model, test_loader, target_only=False)
-    test_preds.append(test_scores[test_original_indices])
+    test_preds.append(eval_model(model, test_loader, target_only=False)[test_original_indices])
 
 for i in range(args.nb_models):
     ema_model = JigsawNet(*embed_mat.shape, 128, embed_mat)
@@ -114,7 +108,6 @@ for i in range(args.nb_models):
 test_preds = np.mean(test_preds, 0)
 ema_test_preds = np.mean(ema_test_preds, 0)
 y_test = (0.5*test_preds + 0.5*ema_test_preds)
-y_test = np.hstack([y_test, 0.9*np.ones(len(y_test))[:,None]]).astype('float32')
 
 
 # training preparation
