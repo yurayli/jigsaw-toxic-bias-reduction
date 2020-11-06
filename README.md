@@ -1,7 +1,7 @@
 ## Jigsaw Unintended Bias in Toxicity Classification
 
 ----
-https://www.kaggle.com/c/jigsaw-unintended-bias-in-toxicity-classification
+https://www.kaggle.com/c/jigsaw-unintended-bias-in-toxicity-classification top-5% solution
 
 ### Task
 Detect toxic comments and minimize unintended model bias
